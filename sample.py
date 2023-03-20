@@ -21,6 +21,7 @@ def load_random_dnb_breaks(num_breaks=3, break_folder='breaks'):
 
   # Choose num_breaks files at random
   chosen_files = random.sample(break_files, num_breaks)
+  print(f"These breaks were chosen: {chosen_files}")
 
   # Load the chosen files using Librosa
   break_list = []
@@ -55,7 +56,7 @@ def mix_and_merge(audios):
     # break_hp = audio
 
     # Apply time shifting with a random amount of samples
-    shift_amount = random.randint(0, sr // 4)
+    shift_amount = random.randint(0, sr // 64)
     filtered_audio = np.roll(break_hp , shift_amount)
 
     # # Lower volume by 4db
