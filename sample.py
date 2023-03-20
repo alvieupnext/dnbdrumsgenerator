@@ -71,11 +71,6 @@ def mix_and_merge(audios):
   for mmb in range(1, len(mixed_breaks)):
     merged_mixed_break += mixed_breaks[mmb]
 
-  nyquist_freq = sr / 2
-  cutoff_freq = 500 / nyquist_freq
-  b, a = signal.butter(3, cutoff_freq, 'lowpass')
-  mixed_breaks = signal.filtfilt(b, a, mixed_breaks)
-
   # Normalize the volume
   mixed_breaks_norm = librosa.util.normalize(merged_mixed_break)
 
