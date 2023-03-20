@@ -55,9 +55,16 @@ def mix_and_merge(audios):
     break_hp = signal.filtfilt(b, a, audio)
     # break_hp = audio
 
+    # Apply random pitch-shifting
+    pitch_amount = random.randint(-4, 4)
+    pitched_break = librosa.effects.pitch_shift(break_hp, sr=sr, n_steps=pitch_amount)
+
     # Apply time shifting with a random amount of samples
     shift_amount = random.randint(0, sr // 64)
-    filtered_audio = np.roll(break_hp , shift_amount)
+    filtered_audio = np.roll(pitched_break, shift_amount)
+
+
+
 
     # # Lower volume by 4db
     filtered_audio *= 10 ** (-4 / 20)
