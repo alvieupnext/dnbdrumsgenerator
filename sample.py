@@ -76,3 +76,12 @@ def mix_and_merge(audios):
 
   return mixed_breaks_norm
 
+def extract_drum_features(audio_file, sr=44100):
+  # Compute spectral features
+  spec_centroid = librosa.feature.spectral_centroid(y=audio_file, sr=sr)
+  spec_bandwidth = librosa.feature.spectral_bandwidth(y=audio_file, sr=sr)
+  spec_contrast = librosa.feature.spectral_contrast(y=audio_file, sr=sr)
+  mfcc = librosa.feature.mfcc(y=audio_file, sr=sr)
+  stft = librosa.feature.chroma_stft(y=audio_file, sr=sr)
+  return spec_centroid, spec_bandwidth, spec_contrast, mfcc, stft
+
