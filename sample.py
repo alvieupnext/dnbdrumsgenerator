@@ -68,7 +68,7 @@ def merge(audios):
 
 
     # Normalize the volume
-  librosa.util.normalize(merged_break)
+  return librosa.util.normalize(merged_break)
 
 def apply_bandpass_filter(audio, sr, low_freq, high_freq):
     # Normalize the frequencies with respect to the Nyquist frequency
@@ -95,6 +95,18 @@ def mix(audio, sr, frequencies, pitch_amount, shift_amount, db):
   (low, high) = frequencies
 
   break_hp = apply_bandpass_filter(audio, sr, low, high)
+
+  pitched_break = librosa.effects.pitch_shift(break_hp, sr=sr, n_steps=pitch_amount)
+
+  shifted_audio = np.roll(pitched_break, shift_amount)
+
+  shifted_audio *= 10 ** (db / 20)
+
+  return shifted_audio
+
+def mix_no_filter(audio, sr, pitch_amount, shift_amount, db):
+
+  break_hp = audio
 
   pitched_break = librosa.effects.pitch_shift(break_hp, sr=sr, n_steps=pitch_amount)
 
