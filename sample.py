@@ -5,6 +5,14 @@ import numpy as np
 from scipy import signal
 from sklearn.metrics.pairwise import cosine_similarity
 
+def load_break(idx, break_folder='breaks'):
+  # Get a list of all files in the break folder
+  break_files = os.listdir(break_folder)
+  break_file = break_files[idx]
+  break_path = os.path.join(break_folder, break_file)
+  loaded_audio_file, sr = librosa.load(break_path, sr=44100)
+  return loaded_audio_file, sr
+
 def load_random_dnb_breaks(num_breaks=3, break_folder='breaks'):
   """
   Load a specified number of random drum and bass breaks from a folder using Librosa.
@@ -43,10 +51,21 @@ def load_random_dnb_breaks(num_breaks=3, break_folder='breaks'):
 
 def merge(audios):
   sr = 44100
-  merged_break = audios[0]
+  max_length = 0
+  for audio in audios:
+    max_length = max(len(audio), max_length)
 
-  for audio in range(1, len(audios)):
-    merged_break += audios[audio]
+  #padding
+  padded_audios = []
+  for audio in audios:
+    padding = max_length - len(audio)
+    padded_audios.append(np.pad(audio, (0, padding), mode='constant'))
+
+  merged_break = padded_audios[0]
+
+  for audio in range(1, len(padded_audios)):
+    merged_break += padded_audios[audio]
+
 
     # Normalize the volume
   librosa.util.normalize(merged_break)
