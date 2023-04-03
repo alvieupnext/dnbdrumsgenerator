@@ -16,7 +16,7 @@ def fitness_func(solution, solution_idx):
   modified_breaks = decode_solution(solution)
 
   # Merge the modified breaks
-  new_track = mix_and_merge(modified_breaks)
+  new_track = merge(modified_breaks)
 
   # Extract features for the new track and the reference track
   new_track_features = extract_drum_features(new_track)
@@ -28,10 +28,31 @@ def fitness_func(solution, solution_idx):
   # Return the similarity score as fitness
   return similarity
 
+lowest_low_freq = 1
+highest_low_freq = 11049
+lowest_high_freq = 11051
+highest_high_freq = 22049
+lowest_pitch = -24
+highest_pitch = 24
+#mute
+lowest_volume = -100
+highest_volume = 4
+
 
 def decode_solution(solution):
-  # Your implementation for decoding the solution to apply the modifications
-  pass
+  mixed_audios = []
+  for idx, parameters in enumerate(solution):
+    og_audio, _ = load_break(idx)
+    highest_shift = len(og_audio)
+    low, high, pitch, shift, db = parameters
+    low_fq = denormalize(low, lowest_low_freq, highest_low_freq)
+    high_fq = denormalize(high, lowest_high_freq, highest_high_freq)
+    pitch_amount = denormalize(pitch, lowest_pitch, highest_pitch)
+    shift_amount = denormalize(shift, 0, highest_shift)
+    db_amount = denormalize(db, lowest_volume, highest_volume)
+    mixed_audio = mix(og_audio, 44100, (low_fq, high_fq), pitch_amount, shift_amount, db_amount)
+    mixed_audios.append(mixed_audio)
+  return mixed_audios
 
 
 # Load drum breaks and reference track
@@ -44,7 +65,7 @@ num_parents_mating = 4
 num_solutions = 8
 
 # Define the initial population
-initial_population = np.random.uniform(low=0, high=1, size=(num_solutions, len(drum_breaks), 3))
+initial_population = np.random.uniform(low=0, high=1, size=(num_solutions, len(drum_breaks), 5))
 
 ga_instance = pygad.GA(
   num_generations=num_generations,
