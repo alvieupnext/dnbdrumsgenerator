@@ -41,6 +41,32 @@ def load_random_dnb_breaks(num_breaks=3, break_folder='breaks'):
 
   return padded_audio, sr
 
+def merge(audios):
+  sr = 44100
+  merged_break = audios[0]
+
+  for audio in range(1, len(audios)):
+    merged_break += audios[audio]
+
+    # Normalize the volume
+  librosa.util.normalize(merged_break)
+
+def mix(audio, cutoff_freq, pitch_amount, shift_amount):
+  sr = 44100
+
+  # Apply a high-pass filter to isolate high frequencies
+  b, a = signal.butter(3, cutoff_freq, 'highpass')
+  break_hp = signal.filtfilt(b, a, audio)
+
+  pitched_break = librosa.effects.pitch_shift(break_hp, sr=sr, n_steps=pitch_amount)
+
+  np.roll(pitched_break, shift_amount)
+
+
+
+
+
+#used for generating drum track references
 def mix_and_merge(audios):
   sr = 44100
   mixed_breaks = []
