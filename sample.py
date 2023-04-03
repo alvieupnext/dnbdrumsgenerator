@@ -51,16 +51,39 @@ def merge(audios):
     # Normalize the volume
   librosa.util.normalize(merged_break)
 
-def mix(audio, cutoff_freq, pitch_amount, shift_amount):
-  sr = 44100
+def apply_bandpass_filter(audio, sr, low_freq, high_freq):
+    # Normalize the frequencies with respect to the Nyquist frequency
+    nyquist_freq = sr / 2
+    low_freq_normalized = low_freq / nyquist_freq
+    high_freq_normalized = high_freq / nyquist_freq
 
-  # Apply a high-pass filter to isolate high frequencies
-  b, a = signal.butter(3, cutoff_freq, 'highpass')
-  break_hp = signal.filtfilt(b, a, audio)
+    # Design a high-pass filter
+    b_high, a_high = signal.butter(3, low_freq_normalized, 'high')
+
+    # Apply the high-pass filter
+    audio_high_passed = signal.filtfilt(b_high, a_high, audio)
+
+    # Design a low-pass filter
+    b_low, a_low = signal.butter(3, high_freq_normalized, 'low')
+
+    # Apply the low-pass filter
+    audio_bandpassed = signal.filtfilt(b_low, a_low, audio_high_passed)
+
+    return audio_bandpassed
+
+def mix(audio, sr, frequencies, pitch_amount, shift_amount, db):
+
+  (low, high) = frequencies
+
+  break_hp = apply_bandpass_filter(audio, sr, low, high)
 
   pitched_break = librosa.effects.pitch_shift(break_hp, sr=sr, n_steps=pitch_amount)
 
-  np.roll(pitched_break, shift_amount)
+  shifted_audio = np.roll(pitched_break, shift_amount)
+
+  shifted_audio *= 10 ** (db / 20)
+
+  return shifted_audio
 
 
 
@@ -73,14 +96,14 @@ def mix_and_merge(audios):
   for audio in audios:
 
     # Choose a random high-pass filter cutoff frequency between 500 and 2000 Hz
-    nyquist_freq = sr / 2
-    min_cutoff_freq = 500 / nyquist_freq
-    max_cutoff_freq = 2000 / nyquist_freq
-    cutoff_freq = random.uniform(min_cutoff_freq, max_cutoff_freq)
-    # Apply a high-pass filter to isolate high frequencies
-    b, a = signal.butter(3, cutoff_freq, 'highpass')
-    break_hp = signal.filtfilt(b, a, audio)
-    # break_hp = audio
+    # nyquist_freq = sr / 2
+    # min_cutoff_freq = 500 / nyquist_freq
+    # max_cutoff_freq = 2000 / nyquist_freq
+    # cutoff_freq = random.uniform(min_cutoff_freq, max_cutoff_freq)
+    # # Apply a high-pass filter to isolate high frequencies
+    # b, a = signal.butter(3, cutoff_freq, 'highpass')
+    # break_hp = signal.filtfilt(b, a, audio)
+    break_hp = audio
 
     # Apply random pitch-shifting
     pitch_amount = random.randint(-4, 4)
