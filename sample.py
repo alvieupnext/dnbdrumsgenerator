@@ -3,6 +3,7 @@ import os
 import random
 import numpy as np
 from scipy import signal
+from sklearn.metrics.pairwise import cosine_similarity
 
 def load_random_dnb_breaks(num_breaks=3, break_folder='breaks'):
   """
@@ -91,4 +92,13 @@ def extract_drum_features(audio_file, sr=44100):
   mfcc = librosa.feature.mfcc(y=audio_file, sr=sr)
   stft = librosa.feature.chroma_stft(y=audio_file, sr=sr)
   return spec_centroid, spec_bandwidth, spec_contrast, mfcc, stft
+
+def compare_tracks_cosine_similarity(track1_features, track2_features):
+  similarity_scores = []
+  for feature1, feature2 in zip(track1_features, track2_features):
+    feature1 = np.mean(feature1, axis=1).reshape(1, -1)
+    feature2 = np.mean(feature2, axis=1).reshape(1, -1)
+    similarity = cosine_similarity(feature1, feature2)
+    similarity_scores.append(similarity[0][0])
+  return np.mean(similarity_scores)
 
