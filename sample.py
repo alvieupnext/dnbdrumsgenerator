@@ -13,6 +13,7 @@ def load_break(idx, break_folder='breaks'):
   loaded_audio_file, sr = librosa.load(break_path, sr=44100)
   return loaded_audio_file, sr
 
+#TODO change this to return two independent samples
 def load_random_dnb_breaks(num_breaks=3, break_folder='breaks'):
   """
   Load a specified number of random drum and bass breaks from a folder using Librosa.

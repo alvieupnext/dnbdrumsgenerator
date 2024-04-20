@@ -11,7 +11,7 @@ def denormalize(value, left_limit, right_limit):
   return int(value * (right_limit - left_limit) + left_limit)
 
 
-def fitness_func(solution, solution_idx):
+def fitness_func(ga, solution, solution_idx):
   # Decode the solution and apply the modifications
   modified_breaks = decode_solution(solution)
 
@@ -59,8 +59,11 @@ def decode_solution(solution):
 drum_breaks, sr = load_random_dnb_breaks(num_breaks=8)
 reference_track = mix_and_merge(drum_breaks)
 
+# save the reference track
+sf.write('exports/reference_track_8.wav', reference_track, 44100, subtype='PCM_24')
+
 # Define the parameters for the genetic algorithm
-num_generations = 100
+num_generations = 15
 num_parents_mating = 4
 num_solutions = 8
 
@@ -86,7 +89,8 @@ print("Best solution fitness:", best_solution_fitness)
 best_modified_breaks = decode_solution(best_solution)
 
 # Merge the best modified breaks
-best_new_track = mix_and_merge(best_modified_breaks)
+best_new_track = merge(best_modified_breaks)
 
-# Save the best new track
-sf.write('exports/best_new_track_100_200.wav', best_new_track, 44100, subtype='PCM_24')
+# Save the created track and the merged track
+sf.write('exports/created_track_8.wav', best_new_track, 44100, subtype='PCM_24')
+sf.write('exports/merged_track_8.wav', merge([reference_track, best_new_track]), 44100, subtype='PCM_24')
